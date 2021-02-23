@@ -68,7 +68,7 @@
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "Set variable1",
+						"activity": "Runtime Sequence Filter",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -92,7 +92,7 @@
 					},
 					"method": "POST",
 					"body": {
-						"value": "@activity('Runtime Sequence Filter').output.value",
+						"value": "@json(activity('Runtime Sequence Filter').output.value.jsonBody)",
 						"type": "Expression"
 					},
 					"authentication": {
@@ -316,26 +316,6 @@
 						"type": "Expression"
 					}
 				}
-			},
-			{
-				"name": "Set variable1",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Runtime Sequence Filter",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "jsonBody",
-					"value": {
-						"value": "@pipeline().parameters.jsonBody",
-						"type": "Expression"
-					}
-				}
 			}
 		],
 		"parameters": {
@@ -351,10 +331,6 @@
 				"type": "string",
 				"defaultValue": "aprio_adf_config.json"
 			},
-			"storageConnectionString": {
-				"type": "string",
-				"defaultValue": "DefaultEndpointsProtocol=https;AccountName=stapriogeneraldev;AccountKey=nUbXvo/Bu38/Yo4vO1Sab1iA7wgm8mIjwms2b0vwUXLBkKERYSuVMC9FA45SY6nL3ZaSmiXpIavEWuhQDHXO3w==;EndpointSuffix=core.windows.net"
-			},
 			"encoding": {
 				"type": "string",
 				"defaultValue": "UTF-8"
@@ -365,11 +341,11 @@
 			},
 			"TenantID": {
 				"type": "String",
-				"defaultValue": "TenantID GUID"
+				"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
 			},
 			"SubscriptionID": {
 				"type": "String",
-				"defaultValue": "Subscription GUID"
+				"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
 			},
 			"Region": {
 				"type": "String",
@@ -396,6 +372,10 @@
 						}
 					]
 				}
+			},
+			"storageSecretName": {
+				"type": "string",
+				"defaultValue": "stapriogeneral-connection-string"
 			}
 		},
 		"variables": {
