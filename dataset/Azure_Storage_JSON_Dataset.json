@@ -1,0 +1,56 @@
+{
+	"name": "Azure_Storage_JSON_Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Azure_Blob_Storage_Linked_Service",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"container": {
+				"type": "string",
+				"defaultValue": "configurations"
+			},
+			"directory": {
+				"type": "string",
+				"defaultValue": "."
+			},
+			"file": {
+				"type": "string",
+				"defaultValue": "aprio_adf_config.json"
+			},
+			"encoding": {
+				"type": "string",
+				"defaultValue": "UTF-8"
+			},
+			"secretName": {
+				"type": "string",
+				"defaultValue": "stapriogeneral-connection-string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().file",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().directory",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				}
+			},
+			"encodingName": {
+				"value": "@dataset().encoding",
+				"type": "Expression"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

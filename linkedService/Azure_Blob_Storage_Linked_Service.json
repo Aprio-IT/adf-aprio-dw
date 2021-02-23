@@ -1,0 +1,22 @@
+{
+	"name": "Azure_Blob_Storage_Linked_Service",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "Azure_Key_Vault_Linked_Service",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "stapriogeneral-connection-string"
+			}
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

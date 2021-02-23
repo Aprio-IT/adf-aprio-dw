@@ -1,0 +1,13 @@
+{
+	"name": "ir-apriodw-001",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Linked to existing Integrated Runtime in ITAppsResourceGroup - AprioDataFactory with source server as Aprio-PE-SRV01 in GA Datacenter. Cbuss & SHillis FEB02-2021\n",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/f579ce31-e6bd-479c-a184-92d055354936/resourcegroups/ITAppsResourceGroup/providers/Microsoft.DataFactory/factories/AprioDataFactory/integrationruntimes/DevIntegrationRuntime\n",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}

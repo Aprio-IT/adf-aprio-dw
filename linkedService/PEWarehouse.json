@@ -1,0 +1,17 @@
+{
+	"name": "PEWarehouse",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=True;data source=Aprio-PE-SRV01;initial catalog=PEWarehouse",
+			"userName": "aprio\\ccg.shillis",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJiNzI2NGI4MC0xZGZmLTQ3OTctYTI4Ny1mZWEwYWI5MTk0NTMiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "ir-apriodw-001",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

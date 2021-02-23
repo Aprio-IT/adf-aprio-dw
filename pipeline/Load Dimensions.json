@@ -1,0 +1,188 @@
+{
+	"name": "Load Dimensions",
+	"properties": {
+		"description": "Pipeline to iterate over procedures created in SQL DB to load the edw layer dimensions from staging.",
+		"activities": [
+			{
+				"name": "Lookup Config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "Azure_Storage_JSON_Dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.configContainer",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.configDirectory",
+								"type": "Expression"
+							},
+							"file": {
+								"value": "@pipeline().parameters.configFile",
+								"type": "Expression"
+							},
+							"encoding": {
+								"value": "@pipeline().parameters.encoding",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Filter Current Pipeline",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Lookup Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Config').output.value[0].dataFactoryPipeline",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@contains(pipeline().Pipeline,item().name)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Runtime Sequence Filter",
+				"description": "This is not filter anything out unless a specific sequence number has been input for a pipeline parameter at runtime.",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Filter Current Pipeline",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Filter Current Pipeline').output.value[0].parameters",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@if(empty(pipeline().parameters.runtimeSequenceFilter),equals(1,1),contains(pipeline().parameters.runtimeSequenceFilter,item().sequence))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "For Each Dimension",
+				"description": "Loop through all source tables that exist in JSON config file, under the pipeline name that equals current pipeline.",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Runtime Sequence Filter",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Runtime Sequence Filter').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 8,
+					"activities": [
+						{
+							"name": "Execute Procedure",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "@item().storedProcedureName",
+									"type": "Expression"
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Azure_SQL_Database_Linked_Service",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"configContainer": {
+				"type": "string",
+				"defaultValue": "configurations"
+			},
+			"configDirectory": {
+				"type": "string",
+				"defaultValue": "."
+			},
+			"configFile": {
+				"type": "string",
+				"defaultValue": "aprio_adf_config.json"
+			},
+			"storageConnectionString": {
+				"type": "string",
+				"defaultValue": "DefaultEndpointsProtocol=https;AccountName=stapriogeneraldev;AccountKey=nUbXvo/Bu38/Yo4vO1Sab1iA7wgm8mIjwms2b0vwUXLBkKERYSuVMC9FA45SY6nL3ZaSmiXpIavEWuhQDHXO3w==;EndpointSuffix=core.windows.net"
+			},
+			"encoding": {
+				"type": "string",
+				"defaultValue": "UTF-8"
+			},
+			"runtimeSequenceFilter": {
+				"type": "array",
+				"defaultValue": []
+			}
+		},
+		"variables": {
+			"StagingTable": {
+				"type": "String"
+			},
+			"sourceSQL": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-18T16:01:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

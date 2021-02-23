@@ -1,0 +1,19 @@
+{
+	"name": "Azure_SQL_Server_Query_Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Azure_SQL_Database_Linked_Service",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"secretName": {
+				"type": "string",
+				"defaultValue": "sqldb-apriodw-connection-string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,32 @@
+{
+	"name": "PEWarehouse_On_Premise_SQL_Server_Linked_Service",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PEWarehouse",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"sourceSchemaName": {
+				"type": "string",
+				"defaultValue": "dbo"
+			},
+			"sourceTableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().sourceSchemaName",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().sourceTableName",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

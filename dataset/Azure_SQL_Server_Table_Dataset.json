@@ -1,0 +1,41 @@
+{
+	"name": "Azure_SQL_Server_Table_Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Azure_SQL_Database_Linked_Service",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"secretName": {
+					"value": "@dataset().secretname",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"schema": {
+				"type": "string"
+			},
+			"table": {
+				"type": "string"
+			},
+			"secretname": {
+				"type": "string",
+				"defaultValue": "sqldb-apriodw-connection-string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().table",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

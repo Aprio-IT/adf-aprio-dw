@@ -1,0 +1,16 @@
+{
+	"name": "adf-apriodw-dev",
+	"properties": {
+		"globalParameters": {
+			"environment": {
+				"type": "string",
+				"value": "dev"
+			},
+			"azureSQLDbSecret": {
+				"type": "string",
+				"value": "sqldb-apriodw-connection-string"
+			}
+		}
+	},
+	"location": "eastus2"
+}

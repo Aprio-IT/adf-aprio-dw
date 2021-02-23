@@ -1,0 +1,297 @@
+{
+	"name": "On-Premise SQL Database to Azure SQL Database",
+	"properties": {
+		"description": "Source to staging pipeline that will reference config JSON file to loop through all tables that need to be staged. This will handle both incremental or full processing types.",
+		"activities": [
+			{
+				"name": "Lookup Config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "Azure_Storage_JSON_Dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.configContainer",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.configDirectory",
+								"type": "Expression"
+							},
+							"file": {
+								"value": "@pipeline().parameters.configFile",
+								"type": "Expression"
+							},
+							"encoding": {
+								"value": "@pipeline().parameters.encoding",
+								"type": "Expression"
+							},
+							"secretName": {
+								"value": "@pipeline().parameters.storageSecretName",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Filter Current Pipeline",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Lookup Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Config').output.value[0].dataFactoryPipeline",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@contains(pipeline().Pipeline,item().name)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Runtime Sequence Filter",
+				"description": "This is not filter anything out unless a specific sequence number has been input for a pipeline parameter at runtime.",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Filter Current Pipeline",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Filter Current Pipeline').output.value[0].parameters",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@if(empty(pipeline().parameters.runtimeSequenceFilter),equals(1,1),contains(pipeline().parameters.runtimeSequenceFilter,item().sequence))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "For Each Source Table",
+				"description": "Loop through all source tables that exist in JSON config file, under the pipeline name that equals current pipeline.",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Runtime Sequence Filter",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Runtime Sequence Filter').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 8,
+					"activities": [
+						{
+							"name": "Copy data",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Lookup High Water Mark",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@if(equals(item().stagingLoadType, 'FULL'), concat('SELECT * FROM ['\n,item().sourceSchemaName\n,'].['\n,item().sourceTableName\n,'];')\n,concat('SELECT * FROM ['\n,item().sourceSchemaName\n,'].['\n,item().sourceTableName\n,'] WHERE '\n,item().modifiedDateColumn\n,' > '''\n,activity('Lookup High Water Mark').output.firstRow.high_water_mark\n,''';')\n)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"isolationLevel": "ReadCommitted",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBatchSize": {
+										"value": "@item().targetWriteBatchSize",
+										"type": "Expression"
+									},
+									"preCopyScript": {
+										"value": "@{concat('IF EXISTS ( SELECT  * FROM sys.tables t inner join sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = '''\n,item().targetSchemaName\n,''' AND t.name = '''\n,item().targetTableName\n,''') TRUNCATE TABLE ['\n,item().targetSchemaName\n,'].['\n,item().targetTableName\n,']')}",
+										"type": "Expression"
+									},
+									"tableOption": "autoCreate",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"enableSkipIncompatibleRow": true,
+								"redirectIncompatibleRowSettings": {
+									"linkedServiceName": {
+										"referenceName": "Azure_Blob_Storage_Linked_Service",
+										"type": "LinkedServiceReference"
+									},
+									"path": {
+										"value": "@item().incompatibleRowsFolderPath",
+										"type": "Expression"
+									}
+								},
+								"dataIntegrationUnits": {
+									"value": "@item().dataIntegrationUnit",
+									"type": "Expression"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "On_Premise_SQL_Server_Query_Dataset",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Azure_SQL_Server_Table_Dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": {
+											"value": "@item().targetSchemaName",
+											"type": "Expression"
+										},
+										"table": {
+											"value": "@item().targetTableName",
+											"type": "Expression"
+										},
+										"secretname": {
+											"value": "@pipeline().globalParameters.azureSQLDbSecret",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Lookup High Water Mark",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@if(equals(item().stagingLoadType , 'INCREMENTAL')\n,concat('SELECT ISNULL(MAX(CONVERT(datetime2,'\n,item().modifiedDateColumn\n,')),''1900-01-01'') AS high_water_mark FROM ['\n,item().targetSchemaName\n,'].['\n,item().targetTableName\n,'];')\n,'SELECT ''1900-01-01'''\n)\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "Azure_SQL_Server_Query_Dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"secretName": {
+											"value": "@pipeline().globalParameters.azureSQLDbSecret",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"configContainer": {
+				"type": "string",
+				"defaultValue": "configurations"
+			},
+			"configDirectory": {
+				"type": "string",
+				"defaultValue": "."
+			},
+			"configFile": {
+				"type": "string",
+				"defaultValue": "aprio_adf_config.json"
+			},
+			"storageConnectionString": {
+				"type": "string"
+			},
+			"encoding": {
+				"type": "string",
+				"defaultValue": "UTF-8"
+			},
+			"runtimeSequenceFilter": {
+				"type": "array",
+				"defaultValue": []
+			},
+			"storageSecretName": {
+				"type": "string",
+				"defaultValue": "stapriogeneral-connection-string"
+			}
+		},
+		"variables": {
+			"StagingTable": {
+				"type": "String"
+			},
+			"sourceSQL": {
+				"type": "String"
+			},
+			"highWaterMark": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-22T20:23:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

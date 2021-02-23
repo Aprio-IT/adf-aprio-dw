@@ -1,0 +1,48 @@
+{
+	"name": "On_Premise_SQL_Server_Linked_Service",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "This inked service uses The self-hosted IR that is configured on Aprio_PE_SRV01",
+		"parameters": {
+			"secretConnectionString": {
+				"type": "string",
+				"defaultValue": "aprio-pe-srv01-connection-string"
+			},
+			"secretPassword": {
+				"type": "string",
+				"defaultValue": "aprio-pe-srv01-adf-password"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "Azure_Key_Vault_Linked_Service",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().secretConnectionString",
+					"type": "Expression"
+				}
+			},
+			"userName": "aprio\\adf.service",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "Azure_Key_Vault_Linked_Service",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().secretPassword",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "ir-apriodw-001",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

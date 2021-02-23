@@ -1,0 +1,167 @@
+{
+	"name": "Change State Azure AS",
+	"properties": {
+		"activities": [
+			{
+				"name": "IfNotDesiredState",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "CheckResourceState",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(pipeline().parameters.desiredState,string(activity('CheckResourceState').output.properties.state)))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "SetDesiredState",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.AnalysisServices/servers/',pipeline().parameters.Server,'/',pipeline().parameters.action,'?api-version=2017-08-01')",
+									"type": "Expression"
+								},
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "POST",
+								"body": {
+									"value": "@null",
+									"type": "Expression"
+								},
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://management.azure.com"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "CheckResourceState",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.AnalysisServices/servers/',pipeline().parameters.Server,'?api-version=2016-05-16')",
+						"type": "Expression"
+					},
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.azure.com"
+					}
+				}
+			},
+			{
+				"name": "UntilStateChanges",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "IfNotDesiredState",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.desiredState,string(activity('CheckAzureASStatus').output.properties.state))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "CheckAzureASStatus",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.AnalysisServices/servers/',pipeline().parameters.Server,'?api-version=2016-05-16')",
+									"type": "Expression"
+								},
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "GET",
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://management.azure.com"
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"TenantID": {
+				"type": "String",
+				"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+			},
+			"SubscriptionID": {
+				"type": "String",
+				"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
+			},
+			"ResourceGroup": {
+				"type": "String",
+				"defaultValue": "rg-dw-dev-eastus2"
+			},
+			"Server": {
+				"type": "String",
+				"defaultValue": "asapriodev"
+			},
+			"desiredState": {
+				"type": "string",
+				"defaultValue": "Succeeded"
+			},
+			"action": {
+				"type": "string",
+				"defaultValue": "resume"
+			}
+		},
+		"folder": {
+			"name": "Azure Management"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-18T16:01:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

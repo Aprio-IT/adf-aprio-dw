@@ -1,0 +1,17 @@
+{
+	"name": "On_Premise_SQL_Server_Query_Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "On_Premise_SQL_Server_Linked_Service",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"secretConnectionString": "aprio-pe-srv01-connection-string",
+				"secretPassword": "aprio-pe-srv01-adf-password"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

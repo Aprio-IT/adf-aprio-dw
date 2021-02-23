@@ -1,0 +1,32 @@
+{
+	"name": "Azure_SQL_Database_Linked_Service",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Connection to Aprio Development SQL DB - Refer to secret stored in keyvault for connection details.",
+		"parameters": {
+			"secretName": {
+				"type": "string",
+				"defaultValue": "sqldb-apriodw-connection-string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "Azure_Key_Vault_Linked_Service",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().secretName",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

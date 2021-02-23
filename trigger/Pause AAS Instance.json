@@ -1,0 +1,41 @@
+{
+	"name": "Pause AAS Instance",
+	"properties": {
+		"description": "Nightly trigger to pause development AAS Instance",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Change State Azure AS",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
+					"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+					"ResourceGroup": "rg-dw-dev-eastus2",
+					"Server": "asapriodev",
+					"desiredState": "Paused",
+					"action": "suspend"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-02-18T20:00:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						20
+					]
+				}
+			}
+		}
+	}
+}

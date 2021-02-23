@@ -1,0 +1,47 @@
+{
+	"name": "Azure_Storage_Delimited_Text_Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Azure_Blob_Storage_Linked_Service",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"container": {
+				"type": "string",
+				"defaultValue": "control"
+			},
+			"directory": {
+				"type": "string",
+				"defaultValue": "."
+			},
+			"columnDelimiter": {
+				"type": "string",
+				"defaultValue": ","
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().directory",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": {
+				"value": "@dataset().columnDelimiter",
+				"type": "Expression"
+			},
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

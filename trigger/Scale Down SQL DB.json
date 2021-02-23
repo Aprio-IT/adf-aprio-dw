@@ -1,0 +1,42 @@
+{
+	"name": "Scale Down SQL DB",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Scale Azure Database",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
+					"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+					"ResourceGroup": "rg-dw-dev-eastus2",
+					"Server": "sql-apriodw-dev",
+					"database": "sqldb-apriodw-dev",
+					"skuName": "S1",
+					"skuTier": "Standard",
+					"apiVersion": "2019-06-01-preview"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-02-04T20:00:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						20
+					]
+				}
+			}
+		}
+	}
+}

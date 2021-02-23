@@ -1,0 +1,413 @@
+{
+	"name": "Process Azure AS",
+	"properties": {
+		"activities": [
+			{
+				"name": "UntilRefreshComplete",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "FilterToCurrentRefresh",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(activity('GetAzureASRefreshStatus').output.status,'inProgress'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GetAzureASRefreshStatus",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Wait20Seconds",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes/',activity('FilterToCurrentRefresh').output.Value[0].refreshId)",
+									"type": "Expression"
+								},
+								"method": "GET",
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://*.asazure.windows.net"
+								}
+							}
+						},
+						{
+							"name": "Wait20Seconds",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 20
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "StartProcessingAzureAS",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes')",
+						"type": "Expression"
+					},
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					},
+					"method": "POST",
+					"body": {
+						"value": "@activity('Runtime Sequence Filter').output.value",
+						"type": "Expression"
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://*.asazure.windows.net"
+					}
+				}
+			},
+			{
+				"name": "IfFailed",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "UntilRefreshComplete",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('GetAzureASRefreshStatus').output.status,'failed')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "ThrowErrorOnFailure",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@string(activity('GetAzureASRefreshStatus').output)",
+									"type": "Expression"
+								},
+								"method": "GET"
+							}
+						},
+						{
+							"name": "EmailSendPipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "ThrowErrorOnFailure",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Email Place Holder",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "GetAzureASRefreshes",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "StartProcessingAzureAS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes')",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"body": {
+						"Type": "Full",
+						"CommitMode": "transactional",
+						"MaxParallelism": 10,
+						"RetryCount": 2
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://*.asazure.windows.net"
+					}
+				}
+			},
+			{
+				"name": "FilterToCurrentRefresh",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GetAzureASRefreshes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@json(activity('GetAzureASRefreshes').output.Response)",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@greaterOrEquals(item().startTime,addseconds(activity('StartProcessingAzureAS').output.startTime,-30))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Lookup Config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "Azure_Storage_JSON_Dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.configContainer",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.configDirectory",
+								"type": "Expression"
+							},
+							"file": {
+								"value": "@pipeline().parameters.configFile",
+								"type": "Expression"
+							},
+							"encoding": {
+								"value": "@pipeline().parameters.encoding",
+								"type": "Expression"
+							},
+							"secretName": "stapriogeneral-connection-string"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Filter Current Pipeline",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Lookup Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Config').output.value[0].dataFactoryPipeline",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@contains(pipeline().Pipeline,item().name)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Runtime Sequence Filter",
+				"description": "This is not filter anything out unless a specific sequence number has been input for a pipeline parameter at runtime.",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Filter Current Pipeline",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Filter Current Pipeline').output.value[0].parameters",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@if(empty(pipeline().parameters.runtimeSequenceFilter),equals(1,1),contains(pipeline().parameters.runtimeSequenceFilter,item().sequence))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Runtime Sequence Filter",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "jsonBody",
+					"value": {
+						"value": "@pipeline().parameters.jsonBody",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"configContainer": {
+				"type": "string",
+				"defaultValue": "configurations"
+			},
+			"configDirectory": {
+				"type": "string",
+				"defaultValue": "."
+			},
+			"configFile": {
+				"type": "string",
+				"defaultValue": "aprio_adf_config.json"
+			},
+			"storageConnectionString": {
+				"type": "string",
+				"defaultValue": "DefaultEndpointsProtocol=https;AccountName=stapriogeneraldev;AccountKey=nUbXvo/Bu38/Yo4vO1Sab1iA7wgm8mIjwms2b0vwUXLBkKERYSuVMC9FA45SY6nL3ZaSmiXpIavEWuhQDHXO3w==;EndpointSuffix=core.windows.net"
+			},
+			"encoding": {
+				"type": "string",
+				"defaultValue": "UTF-8"
+			},
+			"runtimeSequenceFilter": {
+				"type": "array",
+				"defaultValue": []
+			},
+			"TenantID": {
+				"type": "String",
+				"defaultValue": "TenantID GUID"
+			},
+			"SubscriptionID": {
+				"type": "String",
+				"defaultValue": "Subscription GUID"
+			},
+			"Region": {
+				"type": "String",
+				"defaultValue": "Region AS Instance is located"
+			},
+			"Server": {
+				"type": "String",
+				"defaultValue": "Server name, first part only"
+			},
+			"DatabaseName": {
+				"type": "String",
+				"defaultValue": "database name to process on as instance"
+			},
+			"jsonBody": {
+				"type": "string",
+				"defaultValue": {
+					"Type": "Full",
+					"CommitMode": "transactional",
+					"MaxParallelism": 10,
+					"RetryCount": 2,
+					"Objects": [
+						{
+							"table": "Client"
+						}
+					]
+				}
+			}
+		},
+		"variables": {
+			"jsonBody": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Azure Management"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-22T15:37:15Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
