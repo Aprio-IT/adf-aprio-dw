@@ -1,0 +1,779 @@
+{
+
+	"dataFactoryPipeline": [
+		{
+			"name": "On-Premise SQL Database to Azure SQL Database",
+			"parameters": [
+				{
+					"sequence": 1,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tblengagement",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tblengagement",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "ClientUpdated",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.<merge to persisted proc>",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 2,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tblcontacts",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tblcontacts",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Walkouts",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+				},
+				{
+					"sequence": 5,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "TblStaff",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "TblStaff",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Transaction_Summary_By_Office",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 3,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "TblDepartment",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "TblDepartment",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Update_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Insurance_Claim_Status",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 18,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "TblOffices",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "TblOffices",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Walkout_Balances",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 20,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "TblStaffEngagements",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "TblStaffEngagements",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "RelUpdated",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Transaction_Summary_By_Provider",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 21,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "TblEngagementAttributes",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "TblEngagementAttributes",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Creation_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Appointments",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 22,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tblcategory",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tblcategory",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Created",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Insurance_Claims",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 23,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tblsiccodes",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tblsiccodes",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Last_Update_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Patients",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+
+				},
+				{
+					"sequence": 24,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tbljob_header",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tbljob_header",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Job_Updated",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Planned_Services",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 25,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tblservices",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tblservices",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Date_Transmitted",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.usp_Load_Persistent_REC_File_Claims",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+				},
+				{
+					"sequence": 4,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblJob_Tmplt_Header",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblJob_Tmplt_Header",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Skip_Persistent",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 6,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tblcontrol",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tblcontrol",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Insurance_Claim_Tasks",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 7,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tblgrade",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tblgrade",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Providers",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 8,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "TblContactAttributes",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "TblContactAttributes",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Staff",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 9,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "Tblattributes",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "Tblattributes",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Insurance_Plans",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 50,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "TblTranDebtor",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "TblTranDebtor",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "DebtTranDate",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 51,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "TblTranDebtorDetail",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "TblTranDebtorDetail",
+					"targetWriteBatchSize": 2500,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "RowVer",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 52,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblTranProvisions",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblTranProvisions",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 54,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblTranWIP",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblTranWIP",
+					"targetWriteBatchSize": 2500,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "WIPUpdated",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 55,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblJob_TaxReturn",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblJob_TaxReturn",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 56,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblJob_Work_Status",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblJob_Work_Status",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 57,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblOwnerType",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblOwnerType",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 2,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 58,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblClientGainLoss",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblClientGainLoss",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 59,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "emp_charge",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "emp_charge",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 60,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblTax_Return_Types",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblTax_Return_Types",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 61,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblJob_Serv",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblJob_Serv",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 62,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblClientServices",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblClientServices",
+					"targetWriteBatchSize": 1000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 63,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblJob_HeaderChanges",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblJob_HeaderChanges",
+					"targetWriteBatchSize": 2500,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 64,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblJob_Task",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblJob_Task",
+					"targetWriteBatchSize": 2500,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Task_Updated",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 65,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblEngagementChanges",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblEngagementChanges",
+					"targetWriteBatchSize": 2500,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 66,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblTran_History_WIP_Alloc",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblTran_History_WIP_Alloc",
+					"targetWriteBatchSize": 2500,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "HistoryCreated",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 67,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblCurrency",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblCurrency",
+					"targetWriteBatchSize": 2500,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 68,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "tblStaffChanges",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "tblStaffChanges",
+					"targetWriteBatchSize": 2500,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Modified_Date",
+					"incrementalDateRange": -5,
+					"persistentProcedure": "Staging.usp_Load_Persistent_Procedure_Codes",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				}
+			]
+
+		},
+		{
+			"name": "On-Premise PEWarehouse SQL Database to Azure SQL Database",
+			"parameters": [
+				{
+					"sequence": 1,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "DimDate",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "DimDate",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Update_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.<merge to persisted proc>",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 2,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "DimJob",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "DimJob",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Update_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.<merge to persisted proc>",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 3,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "DimClient",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "DimClient",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Update_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.<merge to persisted proc>",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 4,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "DimStaff",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "DimStaff",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Update_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.<merge to persisted proc>",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 5,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "DimPeriod",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "DimPeriod",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Update_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.<merge to persisted proc>",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				},
+				{
+					"sequence": 6,
+					"sourceSchemaName": "dbo",
+					"sourceTableName": "DimTransType",
+					"sourceQueryTimeout": 15,
+					"targetSchemaName": "Staging",
+					"targetTableName": "DimTransType",
+					"targetWriteBatchSize": 2000,
+					"dataIntegrationUnit": 4,
+					"stagingLoadType": "FULL",
+					"modifiedDateColumn": "Update_Date",
+					"incrementalDateRange": -2,
+					"persistentProcedure": "Staging.<merge to persisted proc>",
+					"incompatibleRowsFolderPath": "incompatible-rows"
+
+				}
+			]
+		},
+		{
+			"name": "Azure Storage Delimited Text to Azure SQL Database",
+			"parameters": [
+				{
+					"sequence": 1,
+					"sourceSecretName": "stapriodev-connection-string",
+					"sourceContainer": "control-files",
+					"sourceDirectory": "/",
+					"sourceColumnDelimiter": "\t",
+					"sourceQuoteCharacter": "\"",
+					"sourceFile": "timeframe.csv",
+					"sourceFirstRowAsHeader": true,
+					"sourceStartTimeAddDays": -1,
+					"sourceRecursively": true,
+					"sinkSecretName": "sql-dw-dev-connection-string",
+					"sinkSchema": "staging",
+					"sinkTable": "timeframe",
+					"loadPersistentStoredProcedureName": "",
+					"incompatibleRowsContainer": "incompatible-rows",
+					"to": ""
+				}
+			]
+		},
+		{
+			"name": "Load Dimensions",
+			"parameters": [
+				{
+					"sequence": 1,
+					"storedProcedureName": "edw.usp_Load_DimClient",
+					"loadType": "FULL"
+				},
+				{
+					"sequence": 2,
+					"storedProcedureName": "edw.usp_Load_DimJob",
+					"loadType": "FULL"
+				},
+				{
+					"sequence": 3,
+					"storedProcedureName": "edw.usp_Load_DimStaff",
+					"loadType": "FULL"
+				},
+				{
+					"sequence": 4,
+					"storedProcedureName": "edw.usp_Load_DimTransactionType",
+					"loadType": "FULL"
+				}
+			]
+		},
+		{
+			"name": "Load Facts",
+			"parameters": [
+				{
+					"sequence": 1,
+					"storedProcedureName": "",
+					"loadType": "FULL"
+				}
+			]
+		},
+		{
+			"name": "Scale Up Database",
+			"parameters": [
+				{
+					"sequence": 1,
+					"tier": "GeneralPurpose",
+					"serviceCapacity": "8"
+				}
+			]
+		},
+		{
+			"name": "Scale Down Database",
+			"parameters": [
+				{
+					"sequence": 1,
+					"tier": "GeneralPurpose",
+					"serviceCapacity": "1"
+				}
+			]
+		},
+		{
+			"name": "Change State Azure AS",
+			"parameters": [
+				{
+					"sequence": 1,
+					"tenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
+					"subscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+					"resourceGroup": "rg-dw-dev-eastus2",
+					"server": "asapriodev",
+					"desiredState": "Paused",
+					"action": "suspend"
+
+				}
+			]
+		},
+		{
+			"name": "Process Azure AS",
+			"parameters": [
+				{
+					"sequence": 1,
+					"tenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
+					"subscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+					"region": "aspaaseastus2",
+					"server": "asapriodev",
+					"databaseName": "Billing Analysis",
+					"jsonBody": "{\"Type\": \"Full\", \"CommitMode\": \"transactional\", \"MaxParallelism\":10, \"RetryCount\":2, \"Objects\":[{\"table\": \"Client\"}] }"
+
+				}
+			]
+		},
+		{
+			"name": "Scale Azure Database",
+			"parameters": [
+				{
+					"sequence": 1,
+					"tenantID": "dbo",
+					"subscriptionID": "Transactions",
+					"resourceGroup": "",
+					"server": "dbo",
+					"databaseName": "Transactions",
+					"jsonBody": ""
+
+				}
+			]
+		}
+	]
+
+}
