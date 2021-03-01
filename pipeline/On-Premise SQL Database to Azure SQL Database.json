@@ -147,7 +147,7 @@
 								"source": {
 									"type": "SqlServerSource",
 									"sqlReaderQuery": {
-										"value": "@if(equals(item().stagingLoadType, 'FULL'), concat('SELECT * FROM ['\n,item().sourceSchemaName\n,'].['\n,item().sourceTableName\n,'];')\n,concat('SELECT * FROM ['\n,item().sourceSchemaName\n,'].['\n,item().sourceTableName\n,'] WHERE '\n,item().modifiedDateColumn\n,' > '''\n,activity('Lookup High Water Mark').output.firstRow.high_water_mark\n,''';')\n)",
+										"value": "@if(equals(item().stagingLoadType, 'FULL'), concat('SELECT * FROM ['\n,item().sourceSchemaName\n,'].['\n,item().sourceTableName\n,'];')\n,concat('SELECT * FROM ['\n,item().sourceSchemaName\n,'].['\n,item().sourceTableName\n,'] WHERE '\n,item().modifiedDateColumn\n,' > CAST('''\n,activity('Lookup High Water Mark').output.firstRow.high_water_mark\n,''' AS datetime2);')\n)",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
