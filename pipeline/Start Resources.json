@@ -34,7 +34,7 @@
 							"value": "@pipeline().globalParameters.azureSQLDbDatabase",
 							"type": "Expression"
 						},
-						"skuName": "S4",
+						"skuName": "S3",
 						"skuTier": "Standard",
 						"apiVersion": "2019-06-01-preview"
 					}
