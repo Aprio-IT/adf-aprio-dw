@@ -1,0 +1,37 @@
+{
+	"name": "Start Resources",
+	"properties": {
+		"activities": [
+			{
+				"name": "Scale Azure Database",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Scale Azure Database",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Change State Azure AS",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Change State Azure AS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Azure Management"
+		},
+		"annotations": []
+	}
+}
