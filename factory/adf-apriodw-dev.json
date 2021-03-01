@@ -9,6 +9,10 @@
 			"azureSQLDbSecret": {
 				"type": "string",
 				"value": "sqldb-apriodw-connection-string"
+			},
+			"azureSQLDbDatabase": {
+				"type": "string",
+				"value": "sqldb-apriodw-dev"
 			}
 		}
 	},
