@@ -25,6 +25,10 @@
 			"aprioTenantID": {
 				"type": "string",
 				"value": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+			},
+			"aprioSubscriptionID": {
+				"type": "string",
+				"value": "f579ce31-e6bd-479c-a184-92d055354936"
 			}
 		}
 	},
