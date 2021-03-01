@@ -12,7 +12,11 @@
 						"referenceName": "Scale Azure Database",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
+						"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936"
+					}
 				}
 			},
 			{
@@ -25,7 +29,15 @@
 						"referenceName": "Change State Azure AS",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
+						"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+						"ResourceGroup": "rg-dw-dev-eastus2",
+						"Server": "asapriodev",
+						"desiredState": "Succeeded",
+						"action": "resume"
+					}
 				}
 			}
 		],
