@@ -21,6 +21,10 @@
 			"azureResourceGroup": {
 				"type": "string",
 				"value": "rg-dw-dev-eastus2"
+			},
+			"aprioTenantID": {
+				"type": "string",
+				"value": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
 			}
 		}
 	},
