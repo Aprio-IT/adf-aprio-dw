@@ -29,6 +29,10 @@
 			"aprioSubscriptionID": {
 				"type": "string",
 				"value": "f579ce31-e6bd-479c-a184-92d055354936"
+			},
+			"azureAnalysisServicesServer": {
+				"type": "string",
+				"value": "asapriodev"
 			}
 		}
 	},
