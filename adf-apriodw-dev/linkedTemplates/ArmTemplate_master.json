@@ -1,0 +1,223 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-apriodw-dev"
+		},
+		"PEWarehouse_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'PEWarehouse'"
+		},
+		"PEWarehouse_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'PEWarehouse'"
+		},
+		"Azure_Blob_Storage_Linked_Service_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "stapriogeneral-connection-string"
+		},
+		"Azure_Key_Vault_Linked_Service_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-apriodw-dev.vault.azure.net/"
+		},
+		"Azure_SQL_Database_Linked_Service_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().secretName"
+		},
+		"On_Premise_SQL_Server_Linked_Service_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().secretConnectionString"
+		},
+		"On_Premise_SQL_Server_Linked_Service_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "aprio\\adf.service"
+		},
+		"PEWarehouse_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "aprio\\ccg.shillis"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_TenantID": {
+			"type": "string",
+			"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_SubscriptionID": {
+			"type": "string",
+			"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_ResourceGroup": {
+			"type": "string",
+			"defaultValue": "rg-dw-dev-eastus2"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_Server": {
+			"type": "string",
+			"defaultValue": "asapriodev"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_desiredState": {
+			"type": "string",
+			"defaultValue": "Paused"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_action": {
+			"type": "string",
+			"defaultValue": "suspend"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_TenantID": {
+			"type": "string",
+			"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_SubscriptionID": {
+			"type": "string",
+			"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_ResourceGroup": {
+			"type": "string",
+			"defaultValue": "rg-dw-dev-eastus2"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_Server": {
+			"type": "string",
+			"defaultValue": "sql-apriodw-dev"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_database": {
+			"type": "string",
+			"defaultValue": "sqldb-apriodw-dev"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_skuName": {
+			"type": "string",
+			"defaultValue": "S1"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_skuTier": {
+			"type": "string",
+			"defaultValue": "Standard"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_apiVersion": {
+			"type": "string",
+			"defaultValue": "2019-06-01-preview"
+		},
+		"ir-apriodw-001_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/f579ce31-e6bd-479c-a184-92d055354936/resourcegroups/ITAppsResourceGroup/providers/Microsoft.DataFactory/factories/AprioDataFactory/integrationruntimes/DevIntegrationRuntime\n"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "adf-apriodw-dev_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"PEWarehouse_connectionString": {
+						"value": "[parameters('PEWarehouse_connectionString')]"
+					},
+					"PEWarehouse_password": {
+						"value": "[parameters('PEWarehouse_password')]"
+					},
+					"Azure_Key_Vault_Linked_Service_properties_typeProperties_baseUrl": {
+						"value": "[parameters('Azure_Key_Vault_Linked_Service_properties_typeProperties_baseUrl')]"
+					},
+					"ir-apriodw-001_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('ir-apriodw-001_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"Azure_Blob_Storage_Linked_Service_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('Azure_Blob_Storage_Linked_Service_properties_typeProperties_connectionString_secretName')]"
+					},
+					"Azure_SQL_Database_Linked_Service_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('Azure_SQL_Database_Linked_Service_properties_typeProperties_connectionString_secretName')]"
+					},
+					"On_Premise_SQL_Server_Linked_Service_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('On_Premise_SQL_Server_Linked_Service_properties_typeProperties_connectionString_secretName')]"
+					},
+					"On_Premise_SQL_Server_Linked_Service_properties_typeProperties_userName": {
+						"value": "[parameters('On_Premise_SQL_Server_Linked_Service_properties_typeProperties_userName')]"
+					},
+					"PEWarehouse_properties_typeProperties_userName": {
+						"value": "[parameters('PEWarehouse_properties_typeProperties_userName')]"
+					},
+					"Pause AAS Instance_properties_Change State Azure AS_parameters_TenantID": {
+						"value": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_TenantID')]"
+					},
+					"Pause AAS Instance_properties_Change State Azure AS_parameters_SubscriptionID": {
+						"value": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_SubscriptionID')]"
+					},
+					"Pause AAS Instance_properties_Change State Azure AS_parameters_ResourceGroup": {
+						"value": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_ResourceGroup')]"
+					},
+					"Pause AAS Instance_properties_Change State Azure AS_parameters_Server": {
+						"value": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_Server')]"
+					},
+					"Pause AAS Instance_properties_Change State Azure AS_parameters_desiredState": {
+						"value": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_desiredState')]"
+					},
+					"Pause AAS Instance_properties_Change State Azure AS_parameters_action": {
+						"value": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_action')]"
+					},
+					"Scale Down SQL DB_properties_Scale Azure Database_parameters_TenantID": {
+						"value": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_TenantID')]"
+					},
+					"Scale Down SQL DB_properties_Scale Azure Database_parameters_SubscriptionID": {
+						"value": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_SubscriptionID')]"
+					},
+					"Scale Down SQL DB_properties_Scale Azure Database_parameters_ResourceGroup": {
+						"value": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_ResourceGroup')]"
+					},
+					"Scale Down SQL DB_properties_Scale Azure Database_parameters_Server": {
+						"value": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_Server')]"
+					},
+					"Scale Down SQL DB_properties_Scale Azure Database_parameters_database": {
+						"value": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_database')]"
+					},
+					"Scale Down SQL DB_properties_Scale Azure Database_parameters_skuName": {
+						"value": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_skuName')]"
+					},
+					"Scale Down SQL DB_properties_Scale Azure Database_parameters_skuTier": {
+						"value": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_skuTier')]"
+					},
+					"Scale Down SQL DB_properties_Scale Azure Database_parameters_apiVersion": {
+						"value": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_apiVersion')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "adf-apriodw-dev_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adf-apriodw-dev_ArmTemplate_0')]"
+			]
+		}
+	]
+}

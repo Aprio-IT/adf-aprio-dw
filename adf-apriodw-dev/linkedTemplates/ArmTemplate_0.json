@@ -1,0 +1,1197 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-apriodw-dev"
+		},
+		"PEWarehouse_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'PEWarehouse'"
+		},
+		"PEWarehouse_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'PEWarehouse'"
+		},
+		"Azure_Key_Vault_Linked_Service_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-apriodw-dev.vault.azure.net/"
+		},
+		"ir-apriodw-001_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/f579ce31-e6bd-479c-a184-92d055354936/resourcegroups/ITAppsResourceGroup/providers/Microsoft.DataFactory/factories/AprioDataFactory/integrationruntimes/DevIntegrationRuntime\n"
+		},
+		"Azure_Blob_Storage_Linked_Service_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "stapriogeneral-connection-string"
+		},
+		"Azure_SQL_Database_Linked_Service_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().secretName"
+		},
+		"On_Premise_SQL_Server_Linked_Service_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().secretConnectionString"
+		},
+		"On_Premise_SQL_Server_Linked_Service_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "aprio\\adf.service"
+		},
+		"PEWarehouse_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "aprio\\ccg.shillis"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_TenantID": {
+			"type": "string",
+			"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_SubscriptionID": {
+			"type": "string",
+			"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_ResourceGroup": {
+			"type": "string",
+			"defaultValue": "rg-dw-dev-eastus2"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_Server": {
+			"type": "string",
+			"defaultValue": "asapriodev"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_desiredState": {
+			"type": "string",
+			"defaultValue": "Paused"
+		},
+		"Pause AAS Instance_properties_Change State Azure AS_parameters_action": {
+			"type": "string",
+			"defaultValue": "suspend"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_TenantID": {
+			"type": "string",
+			"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_SubscriptionID": {
+			"type": "string",
+			"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_ResourceGroup": {
+			"type": "string",
+			"defaultValue": "rg-dw-dev-eastus2"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_Server": {
+			"type": "string",
+			"defaultValue": "sql-apriodw-dev"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_database": {
+			"type": "string",
+			"defaultValue": "sqldb-apriodw-dev"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_skuName": {
+			"type": "string",
+			"defaultValue": "S1"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_skuTier": {
+			"type": "string",
+			"defaultValue": "Standard"
+		},
+		"Scale Down SQL DB_properties_Scale Azure Database_parameters_apiVersion": {
+			"type": "string",
+			"defaultValue": "2019-06-01-preview"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_Key_Vault_Linked_Service')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('Azure_Key_Vault_Linked_Service_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ir-apriodw-001')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Linked to existing Integrated Runtime in ITAppsResourceGroup - AprioDataFactory with source server as Aprio-PE-SRV01 in GA Datacenter. Cbuss & SHillis FEB02-2021\n",
+				"typeProperties": {
+					"linkedInfo": {
+						"resourceId": "[parameters('ir-apriodw-001_properties_typeProperties_linkedInfo_resourceId')]",
+						"authorizationType": "Rbac"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Change State Azure AS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "IfNotDesiredState",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckResourceState",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@not(equals(pipeline().parameters.desiredState,string(activity('CheckResourceState').output.properties.state)))",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "SetDesiredState",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.AnalysisServices/servers/',pipeline().parameters.Server,'/',pipeline().parameters.action,'?api-version=2017-08-01')",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "POST",
+										"headers": {},
+										"body": {
+											"value": "@null",
+											"type": "Expression"
+										},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckResourceState",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.AnalysisServices/servers/',pipeline().parameters.Server,'?api-version=2016-05-16')",
+								"type": "Expression"
+							},
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					},
+					{
+						"name": "UntilStateChanges",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "IfNotDesiredState",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.desiredState,string(activity('CheckAzureASStatus').output.properties.state))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "CheckAzureASStatus",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.AnalysisServices/servers/',pipeline().parameters.Server,'?api-version=2016-05-16')",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"headers": {},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com"
+										}
+									}
+								}
+							],
+							"timeout": "7.00:00:00"
+						}
+					}
+				],
+				"parameters": {
+					"TenantID": {
+						"type": "String",
+						"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+					},
+					"SubscriptionID": {
+						"type": "String",
+						"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
+					},
+					"ResourceGroup": {
+						"type": "String",
+						"defaultValue": "rg-dw-dev-eastus2"
+					},
+					"Server": {
+						"type": "String",
+						"defaultValue": "asapriodev"
+					},
+					"desiredState": {
+						"type": "string",
+						"defaultValue": "Succeeded"
+					},
+					"action": {
+						"type": "string",
+						"defaultValue": "resume"
+					}
+				},
+				"folder": {
+					"name": "Azure Management"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-18T16:01:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Scale Azure Database')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "IfNotDesiredState",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "CheckResourceState",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@not(equals(pipeline().parameters.skuName,string(activity('CheckResourceState').output.properties.currentServiceObjectiveName)))",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "SetResourceState",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Sql/servers/',pipeline().parameters.Server,'/','databases/',pipeline().parameters.database,'?api-version=',pipeline().parameters.apiVersion)",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "PATCH",
+										"headers": {},
+										"body": {
+											"value": "@concat('{\n  \"sku\": {\n    \"name\": \"',pipeline().parameters.skuName,'\",\n    \"tier\": \"Standard\"\n  }\n}')",
+											"type": "Expression"
+										},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CheckResourceState",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Sql','/servers/',pipeline().parameters.Server,'/databases/',pipeline().parameters.database,'?api-version=',pipeline().parameters.apiVersion)",
+								"type": "Expression"
+							},
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					},
+					{
+						"name": "UntilStateChanges",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "IfNotDesiredState",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.skuName,string(activity('UntilCheckResourceStatus').output.properties.currentServiceObjectiveName))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "UntilCheckResourceStatus",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Sql','/servers/',pipeline().parameters.Server,'/databases/',pipeline().parameters.database,'?api-version=',pipeline().parameters.apiVersion)",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"headers": {},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com"
+										}
+									}
+								}
+							],
+							"timeout": "7.00:00:00"
+						}
+					}
+				],
+				"parameters": {
+					"TenantID": {
+						"type": "String",
+						"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+					},
+					"SubscriptionID": {
+						"type": "String",
+						"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
+					},
+					"ResourceGroup": {
+						"type": "String",
+						"defaultValue": "rg-dw-dev-eastus2"
+					},
+					"Server": {
+						"type": "String",
+						"defaultValue": "sql-apriodw-dev"
+					},
+					"database": {
+						"type": "string",
+						"defaultValue": "sqldb-apriodw-dev"
+					},
+					"skuName": {
+						"type": "string",
+						"defaultValue": "S2"
+					},
+					"skuTier": {
+						"type": "string",
+						"defaultValue": "Standard"
+					},
+					"apiVersion": {
+						"type": "string",
+						"defaultValue": "2019-06-01-preview"
+					}
+				},
+				"folder": {
+					"name": "Azure Management"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-18T16:01:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_Blob_Storage_Linked_Service')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "Azure_Key_Vault_Linked_Service",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('Azure_Blob_Storage_Linked_Service_properties_typeProperties_connectionString_secretName')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('factoryId'), '/linkedServices/Azure_Key_Vault_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_SQL_Database_Linked_Service')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Connection to Aprio Development SQL DB - Refer to secret stored in keyvault for connection details.",
+				"parameters": {
+					"secretName": {
+						"type": "string",
+						"defaultValue": "sqldb-apriodw-connection-string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "Azure_Key_Vault_Linked_Service",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "[parameters('Azure_SQL_Database_Linked_Service_properties_typeProperties_connectionString_secretName')]",
+							"type": "Expression"
+						}
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('factoryId'), '/linkedServices/Azure_Key_Vault_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/On_Premise_SQL_Server_Linked_Service')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This inked service uses The self-hosted IR that is configured on Aprio_PE_SRV01",
+				"parameters": {
+					"secretConnectionString": {
+						"type": "string",
+						"defaultValue": "aprio-pe-srv01-connection-string"
+					},
+					"secretPassword": {
+						"type": "string",
+						"defaultValue": "aprio-pe-srv01-adf-password"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "Azure_Key_Vault_Linked_Service",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "[parameters('On_Premise_SQL_Server_Linked_Service_properties_typeProperties_connectionString_secretName')]",
+							"type": "Expression"
+						}
+					},
+					"userName": "[parameters('On_Premise_SQL_Server_Linked_Service_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "Azure_Key_Vault_Linked_Service",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": {
+							"value": "@linkedService().secretPassword",
+							"type": "Expression"
+						}
+					}
+				},
+				"connectVia": {
+					"referenceName": "ir-apriodw-001",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ir-apriodw-001')]",
+				"[concat(variables('factoryId'), '/linkedServices/Azure_Key_Vault_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PEWarehouse')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('PEWarehouse_connectionString')]",
+					"userName": "[parameters('PEWarehouse_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('PEWarehouse_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "ir-apriodw-001",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ir-apriodw-001')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_SQL_Server_Query_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Azure_SQL_Database_Linked_Service",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"secretName": {
+						"type": "string",
+						"defaultValue": "sqldb-apriodw-connection-string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Azure_SQL_Database_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_SQL_Server_Table_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Azure_SQL_Database_Linked_Service",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"secretName": {
+							"value": "@dataset().secretname",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					},
+					"secretname": {
+						"type": "string",
+						"defaultValue": "sqldb-apriodw-connection-string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Azure_SQL_Database_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_Storage_Delimited_Text_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Azure_Blob_Storage_Linked_Service",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string",
+						"defaultValue": "control"
+					},
+					"directory": {
+						"type": "string",
+						"defaultValue": "."
+					},
+					"columnDelimiter": {
+						"type": "string",
+						"defaultValue": ","
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().columnDelimiter",
+						"type": "Expression"
+					},
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Azure_Blob_Storage_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_Storage_JSON_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Azure_Blob_Storage_Linked_Service",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string",
+						"defaultValue": "configurations"
+					},
+					"directory": {
+						"type": "string",
+						"defaultValue": "."
+					},
+					"file": {
+						"type": "string",
+						"defaultValue": "aprio_adf_config.json"
+					},
+					"encoding": {
+						"type": "string",
+						"defaultValue": "UTF-8"
+					},
+					"secretName": {
+						"type": "string",
+						"defaultValue": "stapriogeneral-connection-string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().file",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"encodingName": {
+						"value": "@dataset().encoding",
+						"type": "Expression"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Azure_Blob_Storage_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/On_Premise_SQL_Server_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "On_Premise_SQL_Server_Linked_Service",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"sourceSchema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"sourceTable": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().sourceSchema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().sourceTable",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/On_Premise_SQL_Server_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/On_Premise_SQL_Server_Query_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "On_Premise_SQL_Server_Linked_Service",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"secretConnectionString": "aprio-pe-srv01-connection-string",
+						"secretPassword": "aprio-pe-srv01-adf-password"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/On_Premise_SQL_Server_Linked_Service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PEWarehouse_On_Premise_SQL_Server_Linked_Service')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PEWarehouse",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"sourceSchemaName": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"sourceTableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().sourceSchemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().sourceTableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PEWarehouse')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Pause AAS Instance')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Nightly trigger to pause development AAS Instance",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Change State Azure AS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"TenantID": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_TenantID')]",
+							"SubscriptionID": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_SubscriptionID')]",
+							"ResourceGroup": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_ResourceGroup')]",
+							"Server": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_Server')]",
+							"desiredState": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_desiredState')]",
+							"action": "[parameters('Pause AAS Instance_properties_Change State Azure AS_parameters_action')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-02-18T20:00:00",
+						"timeZone": "Eastern Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								20
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Change State Azure AS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Scale Down SQL DB')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Scale Azure Database",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"TenantID": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_TenantID')]",
+							"SubscriptionID": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_SubscriptionID')]",
+							"ResourceGroup": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_ResourceGroup')]",
+							"Server": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_Server')]",
+							"database": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_database')]",
+							"skuName": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_skuName')]",
+							"skuTier": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_skuTier')]",
+							"apiVersion": "[parameters('Scale Down SQL DB_properties_Scale Azure Database_parameters_apiVersion')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-02-04T20:00:00",
+						"timeZone": "Eastern Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								20
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Scale Azure Database')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Start Resources')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Scale Azure Database",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Scale Azure Database",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"TenantID": {
+									"value": "@pipeline().globalParameters.aprioTenantID",
+									"type": "Expression"
+								},
+								"SubscriptionID": {
+									"value": "@pipeline().globalParameters.aprioSubscriptionID",
+									"type": "Expression"
+								},
+								"ResourceGroup": {
+									"value": "@pipeline().globalParameters.azureResourceGroup",
+									"type": "Expression"
+								},
+								"Server": {
+									"value": "@pipeline().globalParameters.azureSQLDbServer",
+									"type": "Expression"
+								},
+								"database": {
+									"value": "@pipeline().globalParameters.azureSQLDbDatabase",
+									"type": "Expression"
+								},
+								"skuName": "S4",
+								"skuTier": "Standard",
+								"apiVersion": "2019-06-01-preview"
+							}
+						}
+					},
+					{
+						"name": "Change State Azure AS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Change State Azure AS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"TenantID": {
+									"value": "@pipeline().globalParameters.aprioTenantID",
+									"type": "Expression"
+								},
+								"SubscriptionID": {
+									"value": "@pipeline().globalParameters.aprioSubscriptionID",
+									"type": "Expression"
+								},
+								"ResourceGroup": {
+									"value": "@pipeline().globalParameters.azureResourceGroup",
+									"type": "Expression"
+								},
+								"Server": {
+									"value": "@pipeline().globalParameters.azureAnalysisServicesServer",
+									"type": "Expression"
+								},
+								"desiredState": "Succeeded",
+								"action": "resume"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "Azure Management"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Scale Azure Database')]",
+				"[concat(variables('factoryId'), '/pipelines/Change State Azure AS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Email Place Holder')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup Config",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "Azure_Storage_JSON_Dataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.configContainer",
+										"type": "Expression"
+									},
+									"directory": {
+										"value": "@pipeline().parameters.configDirectory",
+										"type": "Expression"
+									},
+									"file": {
+										"value": "@pipeline().parameters.configFile",
+										"type": "Expression"
+									},
+									"encoding": {
+										"value": "@pipeline().parameters.encoding",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"parameters": {
+					"configContainer": {
+						"type": "string",
+						"defaultValue": "configurations"
+					},
+					"configDirectory": {
+						"type": "string",
+						"defaultValue": "."
+					},
+					"configFile": {
+						"type": "string",
+						"defaultValue": "aprio_adf_config.json"
+					},
+					"encoding": {
+						"type": "string",
+						"defaultValue": "UTF-8"
+					},
+					"runtimeSequenceFilter": {
+						"type": "array",
+						"defaultValue": []
+					},
+					"secretName": {
+						"type": "string",
+						"defaultValue": "stapriogeneral-connection-string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-22T15:37:14Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Azure_Storage_JSON_Dataset')]"
+			]
+		}
+	]
+}
