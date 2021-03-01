@@ -13,6 +13,10 @@
 			"azureSQLDbDatabase": {
 				"type": "string",
 				"value": "sqldb-apriodw-dev"
+			},
+			"azureSQLDbServer": {
+				"type": "string",
+				"value": "sql-apriodw-dev"
 			}
 		}
 	},
