@@ -1,6 +1,61 @@
 {
 	"name": "Standard Orchestration",
 	"properties": {
+		"activities": [
+			{
+				"name": "On-Premise SQL Database to Azure SQL Database",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "On-Premise SQL Database to Azure SQL Database",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load Dimensions",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "On-Premise SQL Database to Azure SQL Database",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Load Dimensions",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Load Facts",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load Dimensions",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Load Facts",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
 		"annotations": []
 	}
 }

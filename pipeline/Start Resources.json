@@ -15,7 +15,9 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
-						"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936"
+						"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+						"skuName": "S4",
+						"skuTier": "Standard"
 					}
 				}
 			},
