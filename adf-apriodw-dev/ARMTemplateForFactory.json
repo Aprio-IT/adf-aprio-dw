@@ -2639,6 +2639,49 @@
 				"[concat(variables('factoryId'), '/pipelines/Scale Azure Database')]",
 				"[concat(variables('factoryId'), '/pipelines/Change State Azure AS')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/2hrProcessing')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Standard Orchestration",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-03-01T19:27:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								12,
+								14,
+								16,
+								18,
+								20,
+								22
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Standard Orchestration')]"
+			]
 		}
 	]
 }
