@@ -17,6 +17,10 @@
 			"azureSQLDbServer": {
 				"type": "string",
 				"value": "sql-apriodw-dev"
+			},
+			"azureResourceGroup": {
+				"type": "string",
+				"value": "rg-dw-dev-eastus2"
 			}
 		}
 	},
