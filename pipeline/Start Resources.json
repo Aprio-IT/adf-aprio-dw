@@ -14,10 +14,29 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
-						"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+						"TenantID": {
+							"value": "@pipeline().globalParameters.aprioTenantID",
+							"type": "Expression"
+						},
+						"SubscriptionID": {
+							"value": "@pipeline().globalParameters.aprioSubscriptionID",
+							"type": "Expression"
+						},
+						"ResourceGroup": {
+							"value": "@pipeline().globalParameters.azureResourceGroup",
+							"type": "Expression"
+						},
+						"Server": {
+							"value": "@pipeline().globalParameters.azureSQLDbServer",
+							"type": "Expression"
+						},
+						"database": {
+							"value": "@pipeline().globalParameters.azureSQLDbDatabase",
+							"type": "Expression"
+						},
 						"skuName": "S4",
-						"skuTier": "Standard"
+						"skuTier": "Standard",
+						"apiVersion": "2019-06-01-preview"
 					}
 				}
 			},
@@ -33,10 +52,22 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
-						"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
-						"ResourceGroup": "rg-dw-dev-eastus2",
-						"Server": "asapriodev",
+						"TenantID": {
+							"value": "@pipeline().globalParameters.aprioTenantID",
+							"type": "Expression"
+						},
+						"SubscriptionID": {
+							"value": "@pipeline().globalParameters.aprioSubscriptionID",
+							"type": "Expression"
+						},
+						"ResourceGroup": {
+							"value": "@pipeline().globalParameters.azureResourceGroup",
+							"type": "Expression"
+						},
+						"Server": {
+							"value": "@pipeline().globalParameters.azureAnalysisServicesServer",
+							"type": "Expression"
+						},
 						"desiredState": "Succeeded",
 						"action": "resume"
 					}
