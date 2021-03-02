@@ -253,7 +253,7 @@
 			},
 			"Region": {
 				"type": "String",
-				"defaultValue": "aspaaseastu2"
+				"defaultValue": "aspaaseastus2"
 			},
 			"Server": {
 				"type": "String",
