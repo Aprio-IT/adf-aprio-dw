@@ -25,14 +25,14 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2021-02-18T20:00:00",
-				"timeZone": "Eastern Standard Time",
+				"startTime": "2021-02-18T20:00:00Z",
+				"timeZone": "UTC",
 				"schedule": {
 					"minutes": [
 						0
 					],
 					"hours": [
-						20
+						0
 					]
 				}
 			}
