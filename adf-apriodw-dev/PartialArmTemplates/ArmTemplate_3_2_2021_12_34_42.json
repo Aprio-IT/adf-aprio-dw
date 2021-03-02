@@ -1,0 +1,510 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-apriodw-dev"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Process Azure AS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "UntilRefreshComplete",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "FilterToCurrentRefresh",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@not(equals(activity('GetAzureASRefreshStatus').output.status,'inProgress'))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "GetAzureASRefreshStatus",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Wait10Seconds",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes/',activity('FilterToCurrentRefresh').output.Value[0].refreshId)",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://*.asazure.windows.net"
+										}
+									}
+								},
+								{
+									"name": "Wait10Seconds",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 10
+									}
+								}
+							],
+							"timeout": "7.00:00:00"
+						}
+					},
+					{
+						"name": "StartProcessingAzureAS",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes')",
+								"type": "Expression"
+							},
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "POST",
+							"body": {
+								"value": "@pipeline().parameters.jsonBody",
+								"type": "Expression"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://*.asazure.windows.net"
+							}
+						}
+					},
+					{
+						"name": "IfFailed",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "UntilRefreshComplete",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('GetAzureASRefreshStatus').output.status,'failed')",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ThrowErrorOnFailure",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@string(activity('GetAzureASRefreshStatus').output)",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET"
+									}
+								},
+								{
+									"name": "EmailSendPipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "ThrowErrorOnFailure",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Email Place Holder",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "GetAzureASRefreshes",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "StartProcessingAzureAS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes')",
+								"type": "Expression"
+							},
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"body": {
+								"Type": "Full",
+								"CommitMode": "transactional",
+								"MaxParallelism": 10,
+								"RetryCount": 2
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://*.asazure.windows.net"
+							}
+						}
+					},
+					{
+						"name": "FilterToCurrentRefresh",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "GetAzureASRefreshes",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@json(activity('GetAzureASRefreshes').output.Response)",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@greaterOrEquals(item().startTime,addseconds(activity('StartProcessingAzureAS').output.startTime,-30))",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"configContainer": {
+						"type": "string",
+						"defaultValue": "configurations"
+					},
+					"configDirectory": {
+						"type": "string",
+						"defaultValue": "."
+					},
+					"configFile": {
+						"type": "string",
+						"defaultValue": "aprio_adf_config.json"
+					},
+					"encoding": {
+						"type": "string",
+						"defaultValue": "UTF-8"
+					},
+					"runtimeSequenceFilter": {
+						"type": "array",
+						"defaultValue": []
+					},
+					"TenantID": {
+						"type": "String",
+						"defaultValue": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4"
+					},
+					"SubscriptionID": {
+						"type": "String",
+						"defaultValue": "f579ce31-e6bd-479c-a184-92d055354936"
+					},
+					"Region": {
+						"type": "String",
+						"defaultValue": "aspaaseastus2"
+					},
+					"Server": {
+						"type": "String",
+						"defaultValue": "asapriodev"
+					},
+					"DatabaseName": {
+						"type": "String",
+						"defaultValue": "BillingAnalysis"
+					},
+					"jsonBody": {
+						"type": "string",
+						"defaultValue": {
+							"Type": "Full",
+							"CommitMode": "transactional",
+							"MaxParallelism": 10,
+							"RetryCount": 2,
+							"Objects": []
+						}
+					},
+					"storageSecretName": {
+						"type": "string",
+						"defaultValue": "stapriogeneral-connection-string"
+					}
+				},
+				"variables": {
+					"jsonBody": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Azure Management"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-22T15:37:15Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Standard Orchestration')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "On-Premise SQL Database to Azure SQL Database",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Start Resources",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "On-Premise SQL Database to Azure SQL Database",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true
+						}
+					},
+					{
+						"name": "Load Dimensions",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "On-Premise SQL Database to Azure SQL Database",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Load Dimensions",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true
+						}
+					},
+					{
+						"name": "Load Facts",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Load Dimensions",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Load Facts",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true
+						}
+					},
+					{
+						"name": "Start Resources",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Start Resources",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true
+						}
+					},
+					{
+						"name": "Process Azure AS",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Load Facts",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Process Azure AS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Process Azure AS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Pause AAS Instance')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Nightly trigger to pause development AAS Instance",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Change State Azure AS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
+							"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+							"ResourceGroup": "rg-dw-dev-eastus2",
+							"Server": "asapriodev",
+							"desiredState": "Paused",
+							"action": "suspend"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-02-18T20:00:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								0
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Scale Down SQL DB')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Scale Azure Database",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"TenantID": "f67ca2c8-98fe-45b1-98e0-74e2356b52a4",
+							"SubscriptionID": "f579ce31-e6bd-479c-a184-92d055354936",
+							"ResourceGroup": "rg-dw-dev-eastus2",
+							"Server": "sql-apriodw-dev",
+							"database": "sqldb-apriodw-dev",
+							"skuName": "S1",
+							"skuTier": "Standard",
+							"apiVersion": "2019-06-01-preview"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-02-04T20:00:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								0
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

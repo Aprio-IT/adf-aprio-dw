@@ -650,6 +650,94 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Start Resources')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Scale Azure Database",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Scale Azure Database",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"TenantID": {
+									"value": "@pipeline().globalParameters.aprioTenantID",
+									"type": "Expression"
+								},
+								"SubscriptionID": {
+									"value": "@pipeline().globalParameters.aprioSubscriptionID",
+									"type": "Expression"
+								},
+								"ResourceGroup": {
+									"value": "@pipeline().globalParameters.azureResourceGroup",
+									"type": "Expression"
+								},
+								"Server": {
+									"value": "@pipeline().globalParameters.azureSQLDbServer",
+									"type": "Expression"
+								},
+								"database": {
+									"value": "@pipeline().globalParameters.azureSQLDbDatabase",
+									"type": "Expression"
+								},
+								"skuName": "S3",
+								"skuTier": "Standard",
+								"apiVersion": "2019-06-01-preview"
+							}
+						}
+					},
+					{
+						"name": "Change State Azure AS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Change State Azure AS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"TenantID": {
+									"value": "@pipeline().globalParameters.aprioTenantID",
+									"type": "Expression"
+								},
+								"SubscriptionID": {
+									"value": "@pipeline().globalParameters.aprioSubscriptionID",
+									"type": "Expression"
+								},
+								"ResourceGroup": {
+									"value": "@pipeline().globalParameters.azureResourceGroup",
+									"type": "Expression"
+								},
+								"Server": {
+									"value": "@pipeline().globalParameters.azureAnalysisServicesServer",
+									"type": "Expression"
+								},
+								"desiredState": "Succeeded",
+								"action": "resume"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "Azure Management"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Scale Azure Database')]",
+				"[concat(variables('factoryId'), '/pipelines/Change State Azure AS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Azure_SQL_Server_Query_Dataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -952,14 +1040,14 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2021-02-18T20:00:00",
-						"timeZone": "Eastern Standard Time",
+						"startTime": "2021-02-18T20:00:00Z",
+						"timeZone": "UTC",
 						"schedule": {
 							"minutes": [
 								0
 							],
 							"hours": [
-								20
+								0
 							]
 						}
 					}
@@ -999,14 +1087,14 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2021-02-04T20:00:00",
-						"timeZone": "Eastern Standard Time",
+						"startTime": "2021-02-04T20:00:00Z",
+						"timeZone": "UTC",
 						"schedule": {
 							"minutes": [
 								0
 							],
 							"hours": [
-								20
+								0
 							]
 						}
 					}
@@ -1014,94 +1102,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/Scale Azure Database')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Start Resources')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Scale Azure Database",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Scale Azure Database",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"TenantID": {
-									"value": "@pipeline().globalParameters.aprioTenantID",
-									"type": "Expression"
-								},
-								"SubscriptionID": {
-									"value": "@pipeline().globalParameters.aprioSubscriptionID",
-									"type": "Expression"
-								},
-								"ResourceGroup": {
-									"value": "@pipeline().globalParameters.azureResourceGroup",
-									"type": "Expression"
-								},
-								"Server": {
-									"value": "@pipeline().globalParameters.azureSQLDbServer",
-									"type": "Expression"
-								},
-								"database": {
-									"value": "@pipeline().globalParameters.azureSQLDbDatabase",
-									"type": "Expression"
-								},
-								"skuName": "S3",
-								"skuTier": "Standard",
-								"apiVersion": "2019-06-01-preview"
-							}
-						}
-					},
-					{
-						"name": "Change State Azure AS",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Change State Azure AS",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"TenantID": {
-									"value": "@pipeline().globalParameters.aprioTenantID",
-									"type": "Expression"
-								},
-								"SubscriptionID": {
-									"value": "@pipeline().globalParameters.aprioSubscriptionID",
-									"type": "Expression"
-								},
-								"ResourceGroup": {
-									"value": "@pipeline().globalParameters.azureResourceGroup",
-									"type": "Expression"
-								},
-								"Server": {
-									"value": "@pipeline().globalParameters.azureAnalysisServicesServer",
-									"type": "Expression"
-								},
-								"desiredState": "Succeeded",
-								"action": "resume"
-							}
-						}
-					}
-				],
-				"folder": {
-					"name": "Azure Management"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Scale Azure Database')]",
-				"[concat(variables('factoryId'), '/pipelines/Change State Azure AS')]"
 			]
 		},
 		{

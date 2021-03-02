@@ -1346,7 +1346,7 @@
 									"type": "WebActivity",
 									"dependsOn": [
 										{
-											"activity": "Wait20Seconds",
+											"activity": "Wait10Seconds",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1364,6 +1364,10 @@
 											"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes/',activity('FilterToCurrentRefresh').output.Value[0].refreshId)",
 											"type": "Expression"
 										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
 										"method": "GET",
 										"headers": {},
 										"authentication": {
@@ -1373,12 +1377,12 @@
 									}
 								},
 								{
-									"name": "Wait20Seconds",
+									"name": "Wait10Seconds",
 									"type": "Wait",
 									"dependsOn": [],
 									"userProperties": [],
 									"typeProperties": {
-										"waitTimeInSeconds": 20
+										"waitTimeInSeconds": 10
 									}
 								}
 							],
@@ -1388,14 +1392,7 @@
 					{
 						"name": "StartProcessingAzureAS",
 						"type": "WebActivity",
-						"dependsOn": [
-							{
-								"activity": "Runtime Sequence Filter",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -1415,7 +1412,7 @@
 							"method": "POST",
 							"headers": {},
 							"body": {
-								"value": "@json(activity('Runtime Sequence Filter').output.value.jsonBody)",
+								"value": "@pipeline().parameters.jsonBody",
 								"type": "Expression"
 							},
 							"authentication": {
@@ -1457,6 +1454,10 @@
 										"url": {
 											"value": "@string(activity('GetAzureASRefreshStatus').output)",
 											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
 										},
 										"method": "GET",
 										"headers": {}
@@ -1509,6 +1510,10 @@
 								"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes')",
 								"type": "Expression"
 							},
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
 							"method": "GET",
 							"headers": {},
 							"body": {
@@ -1545,103 +1550,6 @@
 								"type": "Expression"
 							}
 						}
-					},
-					{
-						"name": "Lookup Config",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "JsonSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "JsonReadSettings"
-								}
-							},
-							"dataset": {
-								"referenceName": "Azure_Storage_JSON_Dataset",
-								"type": "DatasetReference",
-								"parameters": {
-									"container": {
-										"value": "@pipeline().parameters.configContainer",
-										"type": "Expression"
-									},
-									"directory": {
-										"value": "@pipeline().parameters.configDirectory",
-										"type": "Expression"
-									},
-									"file": {
-										"value": "@pipeline().parameters.configFile",
-										"type": "Expression"
-									},
-									"encoding": {
-										"value": "@pipeline().parameters.encoding",
-										"type": "Expression"
-									},
-									"secretName": "stapriogeneral-connection-string"
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Filter Current Pipeline",
-						"type": "Filter",
-						"dependsOn": [
-							{
-								"activity": "Lookup Config",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Lookup Config').output.value[0].dataFactoryPipeline",
-								"type": "Expression"
-							},
-							"condition": {
-								"value": "@contains(pipeline().Pipeline,item().name)",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Runtime Sequence Filter",
-						"description": "This is not filter anything out unless a specific sequence number has been input for a pipeline parameter at runtime.",
-						"type": "Filter",
-						"dependsOn": [
-							{
-								"activity": "Filter Current Pipeline",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Filter Current Pipeline').output.value[0].parameters",
-								"type": "Expression"
-							},
-							"condition": {
-								"value": "@if(empty(pipeline().parameters.runtimeSequenceFilter),equals(1,1),contains(pipeline().parameters.runtimeSequenceFilter,item().sequence))",
-								"type": "Expression"
-							}
-						}
 					}
 				],
 				"parameters": {
@@ -1675,15 +1583,15 @@
 					},
 					"Region": {
 						"type": "String",
-						"defaultValue": "Region AS Instance is located"
+						"defaultValue": "aspaaseastus2"
 					},
 					"Server": {
 						"type": "String",
-						"defaultValue": "Server name, first part only"
+						"defaultValue": "asapriodev"
 					},
 					"DatabaseName": {
 						"type": "String",
-						"defaultValue": "database name to process on as instance"
+						"defaultValue": "BillingAnalysis"
 					},
 					"jsonBody": {
 						"type": "string",
@@ -1692,11 +1600,7 @@
 							"CommitMode": "transactional",
 							"MaxParallelism": 10,
 							"RetryCount": 2,
-							"Objects": [
-								{
-									"table": "Client"
-								}
-							]
+							"Objects": []
 						}
 					},
 					"storageSecretName": {
@@ -1717,7 +1621,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
-				"[concat(variables('factoryId'), '/datasets/Azure_Storage_JSON_Dataset')]",
 				"[concat(variables('factoryId'), '/pipelines/Email Place Holder')]"
 			]
 		},
@@ -1901,6 +1804,209 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Standard Orchestration')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "On-Premise SQL Database to Azure SQL Database",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Start Resources",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "On-Premise SQL Database to Azure SQL Database",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Load Dimensions",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "On-Premise SQL Database to Azure SQL Database",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Load Dimensions",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Load Facts",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Load Dimensions",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Load Facts",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Start Resources",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Start Resources",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Process Azure AS",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Load Facts",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Process Azure AS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/On-Premise SQL Database to Azure SQL Database')]",
+				"[concat(variables('factoryId'), '/pipelines/Load Dimensions')]",
+				"[concat(variables('factoryId'), '/pipelines/Load Facts')]",
+				"[concat(variables('factoryId'), '/pipelines/Start Resources')]",
+				"[concat(variables('factoryId'), '/pipelines/Process Azure AS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Start Resources')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Scale Azure Database",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Scale Azure Database",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"TenantID": {
+									"value": "@pipeline().globalParameters.aprioTenantID",
+									"type": "Expression"
+								},
+								"SubscriptionID": {
+									"value": "@pipeline().globalParameters.aprioSubscriptionID",
+									"type": "Expression"
+								},
+								"ResourceGroup": {
+									"value": "@pipeline().globalParameters.azureResourceGroup",
+									"type": "Expression"
+								},
+								"Server": {
+									"value": "@pipeline().globalParameters.azureSQLDbServer",
+									"type": "Expression"
+								},
+								"database": {
+									"value": "@pipeline().globalParameters.azureSQLDbDatabase",
+									"type": "Expression"
+								},
+								"skuName": "S3",
+								"skuTier": "Standard",
+								"apiVersion": "2019-06-01-preview"
+							}
+						}
+					},
+					{
+						"name": "Change State Azure AS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Change State Azure AS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"TenantID": {
+									"value": "@pipeline().globalParameters.aprioTenantID",
+									"type": "Expression"
+								},
+								"SubscriptionID": {
+									"value": "@pipeline().globalParameters.aprioSubscriptionID",
+									"type": "Expression"
+								},
+								"ResourceGroup": {
+									"value": "@pipeline().globalParameters.azureResourceGroup",
+									"type": "Expression"
+								},
+								"Server": {
+									"value": "@pipeline().globalParameters.azureAnalysisServicesServer",
+									"type": "Expression"
+								},
+								"desiredState": "Succeeded",
+								"action": "resume"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "Azure Management"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Scale Azure Database')]",
+				"[concat(variables('factoryId'), '/pipelines/Change State Azure AS')]"
 			]
 		},
 		{
@@ -2332,6 +2438,49 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/2hrProcessing')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Standard Orchestration",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-03-01T19:27:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								12,
+								14,
+								16,
+								18,
+								20,
+								22
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Standard Orchestration')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Pause AAS Instance')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -2360,14 +2509,14 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2021-02-18T20:00:00",
-						"timeZone": "Eastern Standard Time",
+						"startTime": "2021-02-18T20:00:00Z",
+						"timeZone": "UTC",
 						"schedule": {
 							"minutes": [
 								0
 							],
 							"hours": [
-								20
+								0
 							]
 						}
 					}
@@ -2407,14 +2556,14 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2021-02-04T20:00:00",
-						"timeZone": "Eastern Standard Time",
+						"startTime": "2021-02-04T20:00:00Z",
+						"timeZone": "UTC",
 						"schedule": {
 							"minutes": [
 								0
 							],
 							"hours": [
-								20
+								0
 							]
 						}
 					}
@@ -2458,230 +2607,6 @@
 				}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Standard Orchestration')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "On-Premise SQL Database to Azure SQL Database",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Start Resources",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "On-Premise SQL Database to Azure SQL Database",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Load Dimensions",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "On-Premise SQL Database to Azure SQL Database",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Load Dimensions",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Load Facts",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Load Dimensions",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Load Facts",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Start Resources",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Start Resources",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/On-Premise SQL Database to Azure SQL Database')]",
-				"[concat(variables('factoryId'), '/pipelines/Load Dimensions')]",
-				"[concat(variables('factoryId'), '/pipelines/Load Facts')]",
-				"[concat(variables('factoryId'), '/pipelines/Start Resources')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Start Resources')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Scale Azure Database",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Scale Azure Database",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"TenantID": {
-									"value": "@pipeline().globalParameters.aprioTenantID",
-									"type": "Expression"
-								},
-								"SubscriptionID": {
-									"value": "@pipeline().globalParameters.aprioSubscriptionID",
-									"type": "Expression"
-								},
-								"ResourceGroup": {
-									"value": "@pipeline().globalParameters.azureResourceGroup",
-									"type": "Expression"
-								},
-								"Server": {
-									"value": "@pipeline().globalParameters.azureSQLDbServer",
-									"type": "Expression"
-								},
-								"database": {
-									"value": "@pipeline().globalParameters.azureSQLDbDatabase",
-									"type": "Expression"
-								},
-								"skuName": "S3",
-								"skuTier": "Standard",
-								"apiVersion": "2019-06-01-preview"
-							}
-						}
-					},
-					{
-						"name": "Change State Azure AS",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Change State Azure AS",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"TenantID": {
-									"value": "@pipeline().globalParameters.aprioTenantID",
-									"type": "Expression"
-								},
-								"SubscriptionID": {
-									"value": "@pipeline().globalParameters.aprioSubscriptionID",
-									"type": "Expression"
-								},
-								"ResourceGroup": {
-									"value": "@pipeline().globalParameters.azureResourceGroup",
-									"type": "Expression"
-								},
-								"Server": {
-									"value": "@pipeline().globalParameters.azureAnalysisServicesServer",
-									"type": "Expression"
-								},
-								"desiredState": "Succeeded",
-								"action": "resume"
-							}
-						}
-					}
-				],
-				"folder": {
-					"name": "Azure Management"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Scale Azure Database')]",
-				"[concat(variables('factoryId'), '/pipelines/Change State Azure AS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/2hrProcessing')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "Standard Orchestration",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2021-03-01T19:27:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								12,
-								14,
-								16,
-								18,
-								20,
-								22
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Standard Orchestration')]"
-			]
 		}
 	]
 }
