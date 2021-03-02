@@ -66,14 +66,7 @@
 			{
 				"name": "StartProcessingAzureAS",
 				"type": "WebActivity",
-				"dependsOn": [
-					{
-						"activity": "Runtime Sequence Filter",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -92,7 +85,7 @@
 					},
 					"method": "POST",
 					"body": {
-						"value": "@json(activity('Runtime Sequence Filter').output.value.jsonBody)",
+						"value": "@json(pipeline().parameters.jsonBody)",
 						"type": "Expression"
 					},
 					"authentication": {
@@ -134,6 +127,10 @@
 								"url": {
 									"value": "@string(activity('GetAzureASRefreshStatus').output)",
 									"type": "Expression"
+								},
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
 								},
 								"method": "GET"
 							}
@@ -219,103 +216,6 @@
 						"type": "Expression"
 					}
 				}
-			},
-			{
-				"name": "Lookup Config",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "JsonSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "JsonReadSettings"
-						}
-					},
-					"dataset": {
-						"referenceName": "Azure_Storage_JSON_Dataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": {
-								"value": "@pipeline().parameters.configContainer",
-								"type": "Expression"
-							},
-							"directory": {
-								"value": "@pipeline().parameters.configDirectory",
-								"type": "Expression"
-							},
-							"file": {
-								"value": "@pipeline().parameters.configFile",
-								"type": "Expression"
-							},
-							"encoding": {
-								"value": "@pipeline().parameters.encoding",
-								"type": "Expression"
-							},
-							"secretName": "stapriogeneral-connection-string"
-						}
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "Filter Current Pipeline",
-				"type": "Filter",
-				"dependsOn": [
-					{
-						"activity": "Lookup Config",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('Lookup Config').output.value[0].dataFactoryPipeline",
-						"type": "Expression"
-					},
-					"condition": {
-						"value": "@contains(pipeline().Pipeline,item().name)",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "Runtime Sequence Filter",
-				"description": "This is not filter anything out unless a specific sequence number has been input for a pipeline parameter at runtime.",
-				"type": "Filter",
-				"dependsOn": [
-					{
-						"activity": "Filter Current Pipeline",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('Filter Current Pipeline').output.value[0].parameters",
-						"type": "Expression"
-					},
-					"condition": {
-						"value": "@if(empty(pipeline().parameters.runtimeSequenceFilter),equals(1,1),contains(pipeline().parameters.runtimeSequenceFilter,item().sequence))",
-						"type": "Expression"
-					}
-				}
 			}
 		],
 		"parameters": {
@@ -349,15 +249,15 @@
 			},
 			"Region": {
 				"type": "String",
-				"defaultValue": "Region AS Instance is located"
+				"defaultValue": "aspaaseastu2"
 			},
 			"Server": {
 				"type": "String",
-				"defaultValue": "Server name, first part only"
+				"defaultValue": "asapriodev"
 			},
 			"DatabaseName": {
 				"type": "String",
-				"defaultValue": "database name to process on as instance"
+				"defaultValue": "Billing Analysis as instance"
 			},
 			"jsonBody": {
 				"type": "string",
