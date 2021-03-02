@@ -261,7 +261,7 @@
 			},
 			"DatabaseName": {
 				"type": "String",
-				"defaultValue": "Billing Analysis"
+				"defaultValue": "BillingAnalysis"
 			},
 			"jsonBody": {
 				"type": "string",
