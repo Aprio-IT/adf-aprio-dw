@@ -85,7 +85,7 @@
 					},
 					"method": "POST",
 					"body": {
-						"value": "@json(pipeline().parameters.jsonBody)",
+						"value": "@pipeline().parameters.jsonBody",
 						"type": "Expression"
 					},
 					"authentication": {
@@ -180,6 +180,10 @@
 					"url": {
 						"value": "@concat('https://',pipeline().parameters.Region,'.asazure.windows.net/servers/',pipeline().parameters.Server,'/models/',pipeline().parameters.DatabaseName,'/refreshes')",
 						"type": "Expression"
+					},
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
 					},
 					"method": "GET",
 					"body": {
