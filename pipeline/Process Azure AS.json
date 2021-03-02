@@ -270,11 +270,7 @@
 					"CommitMode": "transactional",
 					"MaxParallelism": 10,
 					"RetryCount": 2,
-					"Objects": [
-						{
-							"table": "Client"
-						}
-					]
+					"Objects": []
 				}
 			},
 			"storageSecretName": {
