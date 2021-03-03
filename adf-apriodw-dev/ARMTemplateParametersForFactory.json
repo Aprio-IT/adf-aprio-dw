@@ -8,9 +8,6 @@
 		"PEWarehouse_connectionString": {
 			"value": ""
 		},
-		"PEWarehouse_password": {
-			"value": ""
-		},
 		"Azure_Blob_Storage_Linked_Service_properties_typeProperties_connectionString_secretName": {
 			"value": "stapriogeneral-connection-string"
 		},

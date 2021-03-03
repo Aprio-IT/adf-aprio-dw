@@ -11,10 +11,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'PEWarehouse'"
 		},
-		"PEWarehouse_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'PEWarehouse'"
-		},
 		"Azure_Blob_Storage_Linked_Service_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "stapriogeneral-connection-string"
@@ -128,9 +124,6 @@
 					},
 					"PEWarehouse_connectionString": {
 						"value": "[parameters('PEWarehouse_connectionString')]"
-					},
-					"PEWarehouse_password": {
-						"value": "[parameters('PEWarehouse_password')]"
 					},
 					"Azure_Key_Vault_Linked_Service_properties_typeProperties_baseUrl": {
 						"value": "[parameters('Azure_Key_Vault_Linked_Service_properties_typeProperties_baseUrl')]"

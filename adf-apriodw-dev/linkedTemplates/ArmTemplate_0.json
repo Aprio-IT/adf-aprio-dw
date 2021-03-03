@@ -11,10 +11,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'PEWarehouse'"
 		},
-		"PEWarehouse_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'PEWarehouse'"
-		},
 		"Azure_Key_Vault_Linked_Service_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://kv-apriodw-dev.vault.azure.net/"
@@ -636,8 +632,12 @@
 					"connectionString": "[parameters('PEWarehouse_connectionString')]",
 					"userName": "[parameters('PEWarehouse_properties_typeProperties_userName')]",
 					"password": {
-						"type": "SecureString",
-						"value": "[parameters('PEWarehouse_password')]"
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "Azure_Key_Vault_Linked_Service",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "temp-PEwarehouse-password"
 					}
 				},
 				"connectVia": {
@@ -646,7 +646,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/ir-apriodw-001')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/ir-apriodw-001')]",
+				"[concat(variables('factoryId'), '/linkedServices/Azure_Key_Vault_Linked_Service')]"
 			]
 		},
 		{
