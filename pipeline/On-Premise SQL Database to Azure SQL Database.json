@@ -142,7 +142,16 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": [],
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "@{item().sourceSchemaName}.@{item().sourceTableName}"
+								},
+								{
+									"name": "Destination",
+									"value": "@{item().targetSchemaName}.@{item().targetTableName}"
+								}
+							],
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
