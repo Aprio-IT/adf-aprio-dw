@@ -498,7 +498,12 @@
 										"secureOutput": false,
 										"secureInput": false
 									},
-									"userProperties": [],
+									"userProperties": [
+										{
+											"name": "procedureName",
+											"value": "@{item().storedProcedureName}"
+										}
+									],
 									"typeProperties": {
 										"storedProcedureName": {
 											"value": "@item().storedProcedureName",
@@ -507,7 +512,10 @@
 									},
 									"linkedServiceName": {
 										"referenceName": "Azure_SQL_Database_Linked_Service",
-										"type": "LinkedServiceReference"
+										"type": "LinkedServiceReference",
+										"parameters": {
+											"secretName": "sqldb-apriodw-connection-string"
+										}
 									}
 								}
 							]
@@ -692,7 +700,12 @@
 										"secureOutput": false,
 										"secureInput": false
 									},
-									"userProperties": [],
+									"userProperties": [
+										{
+											"name": "procedureName",
+											"value": "@{item().storedProcedureName}"
+										}
+									],
 									"typeProperties": {
 										"storedProcedureName": {
 											"value": "@item().storedProcedureName",
@@ -701,7 +714,10 @@
 									},
 									"linkedServiceName": {
 										"referenceName": "Azure_SQL_Database_Linked_Service",
-										"type": "LinkedServiceReference"
+										"type": "LinkedServiceReference",
+										"parameters": {
+											"secretName": "sqldb-apriodw-connection-string"
+										}
 									}
 								}
 							]
@@ -1133,7 +1149,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
-							"batchCount": 8,
+							"batchCount": 10,
 							"activities": [
 								{
 									"name": "Copy data",
@@ -1153,7 +1169,16 @@
 										"secureOutput": false,
 										"secureInput": false
 									},
-									"userProperties": [],
+									"userProperties": [
+										{
+											"name": "Source",
+											"value": "@{item().sourceSchemaName}.@{item().sourceTableName}"
+										},
+										{
+											"name": "Destination",
+											"value": "@{item().targetSchemaName}.@{item().targetTableName}"
+										}
+									],
 									"typeProperties": {
 										"source": {
 											"type": "SqlServerSource",
